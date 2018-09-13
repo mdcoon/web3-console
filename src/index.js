@@ -5,6 +5,7 @@ import paraseArgs from 'minimist';
 import chalk from 'chalk';
 import Web3 from 'web3';
 import Web3Method from 'web3-core-method';
+import net from 'net';
 
 let args = paraseArgs(process.argv.slice(2));
 args = (args._ || []);
@@ -26,7 +27,7 @@ if(url.startsWith("ipc:")) {
 
 let provider = null;
 if(ipcPath) {
-  provider = new Web3.providers.IPCProvider(ipcPath);
+  provider = new Web3.providers.IPCProvider(ipcPath, net);
 } else {
   provider = new Web3.providers.HttpProvider(url);
 }

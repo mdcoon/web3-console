@@ -4,9 +4,12 @@ import repl from 'repl';
 import paraseArgs from 'minimist';
 import chalk from 'chalk';
 import Web3 from 'web3';
+import Web3Method from 'web3-core-method';
 
-const args = paraseArgs(process.argv.slice(2));
-const arg = (args._ || [])[0];
+let args = paraseArgs(process.argv.slice(2));
+args = (args._ || []);
+
+const arg = args[0];
 
 let url = 'http://localhost:8545';
 
@@ -16,7 +19,34 @@ if (typeof arg === 'string') {
   url = `http://localhost:${arg}`;
 }
 
-const web3 = new Web3(new Web3.providers.HttpProvider(url));
+let ipcPath = null;
+if(url.startsWith("ipc:")) {
+  ipcPath = url.substring(4);
+}
+
+let provider = null;
+if(ipcPath) {
+  provider = new Web3.providers.IPCProvider(ipcPath);
+} else {
+  provider = new Web3.providers.HttpProvider(url);
+}
+const web3 =  new Web3(provider);
+
+if(args.length > 1) {
+  if(args[1] === 'parity') {
+    let exensions = [
+      new Web3Method({
+        name: "allTransactions",
+        call: "parity_allTransactions",
+        params: 0
+      })
+    ];
+    exensions.forEach(m=>{
+      m.attachToObject(web3);
+      m.setRequestManager(web3._requestManager);
+    });
+  }
+}
 
 function prettyInfo(name, value) {
   return `${chalk.dim(`${name}:`)} ${chalk.green(value)}`;

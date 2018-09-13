@@ -17,10 +17,16 @@ var _web = require('web3');
 
 var _web2 = _interopRequireDefault(_web);
 
+var _web3CoreMethod = require('web3-core-method');
+
+var _web3CoreMethod2 = _interopRequireDefault(_web3CoreMethod);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var args = (0, _minimist2.default)(process.argv.slice(2));
-var arg = (args._ || [])[0];
+args = args._ || [];
+
+var arg = args[0];
 
 var url = 'http://localhost:8545';
 
@@ -30,7 +36,32 @@ if (typeof arg === 'string') {
   url = 'http://localhost:' + arg;
 }
 
-var web3 = new _web2.default(new _web2.default.providers.HttpProvider(url));
+var ipcPath = null;
+if (url.startsWith("ipc:")) {
+  ipcPath = url.substring(4);
+}
+
+var provider = null;
+if (ipcPath) {
+  provider = new _web2.default.providers.IPCProvider(ipcPath);
+} else {
+  provider = new _web2.default.providers.HttpProvider(url);
+}
+var web3 = new _web2.default(provider);
+
+if (args.length > 1) {
+  if (args[1] === 'parity') {
+    var exensions = [new _web3CoreMethod2.default({
+      name: "allTransactions",
+      call: "parity_allTransactions",
+      params: 0
+    })];
+    exensions.forEach(function (m) {
+      m.attachToObject(web3);
+      m.setRequestManager(web3._requestManager);
+    });
+  }
+}
 
 function prettyInfo(name, value) {
   return _chalk2.default.dim(name + ':') + ' ' + _chalk2.default.green(value);

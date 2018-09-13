@@ -6,7 +6,10 @@ import chalk from 'chalk';
 import Web3 from 'web3';
 import Web3Method from 'web3-core-method';
 import net from 'net';
+import helpers from 'web3-core-helpers';
+import utils  from 'web3-utils'
 
+const formatter = helpers.formatters;
 let args = paraseArgs(process.argv.slice(2));
 args = (args._ || []);
 
@@ -40,7 +43,13 @@ if(args.length > 1) {
         name: "allTransactions",
         call: "parity_allTransactions",
         params: 0
-      })
+      }),
+      new Web3Method({
+        name: "replayTransaction",
+        call: "trace_replayTransaction",
+        params: 2,
+        inputFormatter: [null,null]
+      }),
     ];
     exensions.forEach(m=>{
       m.attachToObject(web3);

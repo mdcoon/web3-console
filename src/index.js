@@ -27,7 +27,7 @@ if(url.startsWith("ipc:")) {
 
 let provider = null;
 if(ipcPath) {
-  provider = new Web3.providers.IPCProvider(ipcPath, net);
+  provider = new Web3.providers.IpcProvider(ipcPath, net);
 } else {
   provider = new Web3.providers.HttpProvider(url);
 }
